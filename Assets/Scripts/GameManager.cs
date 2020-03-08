@@ -5,12 +5,20 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 
+public enum GameState
+{
+    Playing,
+    Win
+}
+
 public class GameManager : MonoBehaviour
 {
     public List<int[]> neighbors = new List<int[]>();
     public List<Block> blocks;
     public int rightPlace = 9;
-    public GameObject winText;
+
+    public ReactiveProperty<GameState> GameState = new ReactiveProperty<GameState>(global::GameState.Playing);
+    public IntReactiveProperty amountMovement;
 
     private void Start()
     {
@@ -37,17 +45,14 @@ public class GameManager : MonoBehaviour
         Shuffle();
     }
 
-    //Embaralhar e condição de vitoria
-    //Prestar atenção em como embaralhar sem deixar insoluvel
-    //Embaralhar como se o jogador estivesse jogando
-    // Update is called once per frame
-
     public void Shuffle()
     {
-        winText.SetActive(false);
-        var range = Random.Range(1, 100);
-        Observable.Range(1, range)
-            .Subscribe(_ => ShuffleBlock());
+        ResetGame();
+        var acceptRightPlace = Random.Range(0, 3);
+        for (var i = 0; i < 50 || rightPlace > acceptRightPlace; i++)
+        {
+            ShuffleBlock();
+        }
     }
 
     private void ShuffleBlock()
@@ -63,10 +68,11 @@ public class GameManager : MonoBehaviour
         foreach (var neighborsIndex in blockToMoving.neighbors)
         {
             if (blocks[neighborsIndex].type.Equals(Block.Type.normal)) continue;
+            amountMovement.Value++;
             var blockToMovingIndex = blocks.FindIndex(block => block.id == blockToMoving.id);
             SwapBlocks(blockToMovingIndex, neighborsIndex);
             if (rightPlace == 9)
-                winText.SetActive(true);
+                GameState.Value = global::GameState.Win;
             break;
         }
     }
@@ -95,5 +101,11 @@ public class GameManager : MonoBehaviour
             rightPlace--;
         else if (indexBlockB == blockA.id)
             rightPlace++;
+    }
+
+    private void ResetGame()
+    {
+        GameState.Value = global::GameState.Playing;
+        amountMovement.Value = 0;
     }
 }
