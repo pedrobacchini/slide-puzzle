@@ -82,16 +82,11 @@ public class GameManager : MonoBehaviour
         var blockA = blocks[indexBlockA];
         var blockB = blocks[indexBlockB];
         //Swap list position
-        blocks[indexBlockA] = blockB;
-        blocks[indexBlockB] = blockA;
+        (blocks[indexBlockA], blocks[indexBlockB]) = (blockB, blockA);
         //Swap unity position
-        var position = blockA.transform.position;
-        blockA.transform.position = blockB.transform.position;
-        blockB.transform.position = position;
+        (blockA.transform.position, blockB.transform.position) = (blockB.transform.position, blockA.transform.position);
         //Swap neighbors
-        var neighbor = blockA.neighbors;
-        blockA.neighbors = blockB.neighbors;
-        blockB.neighbors = neighbor;
+        (blockA.neighbors, blockB.neighbors) = (blockB.neighbors, blockA.neighbors);
         //Update Right Places
         if (indexBlockA == blockA.id)
             rightPlace--;
